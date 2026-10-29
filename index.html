@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>a-node 검수 앱 알파 테스트 안내</title>
+<link rel="icon" href="favicon-32.png">
+<style>
+  /* 색은 docs/design-guide.md 1장 토큰. 정적 안내 문서라 다크 모드는 OS 설정 자동 전환만 */
+  :root {
+    --bg: #f5f6f8; --surface: #ffffff; --surface-2: #ecf0f4;
+    --fg: #171c26; --muted: #5c6678; --line: #d9dee6;
+    --accent: #0a0b0d; --accent-soft: #e9eaec;
+    --minus: #a8342b; --plus: #1b6b49; --warn: #8a5c00;
+    --appbar: #0a0b0d; --appbar-fg: #f2f3f5; --appbar-line: #71767e;
+    --font-sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --touch: 44px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1319; --surface: #171d26; --surface-2: #1f2733;
+      --fg: #e8ecf2; --muted: #93a0b4; --line: #2a3340;
+      --accent: #f2f3f5; --accent-soft: #262b33;
+      --minus: #ff8077; --plus: #58c795; --warn: #e2a845;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 var(--font-sans); }
+  a { color: inherit; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .bar { display: flex; gap: 8px; align-items: center; padding: 12px 16px; background: var(--appbar); color: var(--appbar-fg); border-bottom: 1px solid var(--line); }
+  .bar img { width: 28px; height: 28px; }
+  .bar .chip { margin-left: 8px; border-color: var(--appbar-line); color: var(--appbar-fg); }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: clamp(23px, 5.4vw, 30px); font-weight: 700; line-height: 1.3; margin: 8px 0 6px; }
+  h2 { font-size: 20px; font-weight: 600; margin: 40px 0 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 16px; font-weight: 600; margin: 20px 0 6px; }
+  p, li { overflow-wrap: anywhere; }
+  .lead, .meta { color: var(--muted); }
+  .lead { margin: 0 0 16px; }
+  .meta { margin: 0; }
+  .chip { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 12px 0; }
+  .download { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .b-pri, .b-sec { display: inline-flex; align-items: center; min-height: var(--touch); padding: 0 18px; border-radius: 7px; border: 1px solid transparent; font-weight: 600; text-decoration: none; }
+  .b-pri { background: var(--accent); color: var(--bg); }
+  .b-sec { background: transparent; color: var(--fg); border-color: var(--line); }
+  .banner { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 10px 14px; border-radius: 0 7px 7px 0; margin: 12px 0; }
+  .banner.warn { border-left-color: var(--warn); background: var(--surface-2); }
+  .banner.minus { border-left-color: var(--minus); background: var(--surface-2); }
+  .banner b { margin-right: 6px; }
+  .banner.warn b { color: var(--warn); }
+  .banner.minus b { color: var(--minus); }
+  code, pre { font-family: var(--font-mono); font-size: 13.5px; }
+  code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  pre { background: var(--surface-2); border: 1px solid var(--line); border-radius: 7px; padding: 12px 14px; }
+  pre.tree { white-space: pre; overflow-x: auto; } /* 구조도는 정렬 유지, 블록 안에서만 가로 스크롤 */
+  pre.cmd { white-space: pre-wrap; word-break: break-all; }
+  ol, ul { padding-left: 22px; }
+  li + li { margin-top: 4px; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-top: 1px solid var(--line); }
+  thead th { border-top: 0; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  tbody th { font-weight: 600; white-space: nowrap; }
+  .toc { columns: 2; column-gap: 24px; margin: 16px 0; }
+  .toc li { break-inside: avoid; margin: 0; }
+  .toc a { display: inline-flex; align-items: center; min-height: var(--touch); }
+  footer { color: var(--muted); font-size: 13px; margin-top: 48px; }
+  @media (max-width: 620px) { .toc { columns: 1; } tbody th { white-space: normal; } }
+</style>
+</head>
+<body>
+<header class="bar"><img src="a-node-appicon.svg" alt=""><b>a-node 검수 앱</b><span class="chip">알파 테스트</span></header>
+<main>
+  <h1>알파 테스트 안내</h1>
+  <p class="lead">회수 노트북(윈도우·맥)을 검수하는 a-node 검수 앱의 사내 알파 버전. 내려받기, 검수 USB 만들기, 실행, 결과 회수, 문제 보고 순서 안내</p>
+
+  <div class="card download">
+    <a class="b-pri" href="https://github.com/ryugoon-ctrl/anode-inspect-release/releases/latest/download/anode-inspect-alpha.zip">검수 USB 묶음 내려받기 (zip)</a>
+    <a class="b-sec" href="https://github.com/ryugoon-ctrl/anode-inspect-release/releases">버전별 변경 내용</a>
+    <p class="meta">버전 <code>v0.1.0-alpha.1</code> · 윈도우 10·11, macOS (애플 실리콘·인텔)</p>
+  </div>
+
+  <ol class="toc">
+    <li><a href="#prepare">준비물</a></li>
+    <li><a href="#usb">검수 USB 만들기</a></li>
+    <li><a href="#mac">맥에서 실행</a></li>
+    <li><a href="#win">윈도우에서 실행</a></li>
+    <li><a href="#flow">검수 순서</a></li>
+    <li><a href="#save">결과 저장과 회수</a></li>
+    <li><a href="#check">알파 테스트 확인 목록</a></li>
+    <li><a href="#report">문제 보고</a></li>
+    <li><a href="#limits">알려진 제한</a></li>
+    <li><a href="#sheets">구글 시트 전송 설정 (관리자)</a></li>
+  </ol>
+
+  <h2 id="prepare">준비물</h2>
+  <ul>
+    <li>검수 USB: 8GB 이상. 윈도우·맥 모두에서 쓰려면 exFAT 형식. 개인 파일·인증서가 없는 검수 전용 USB 권장</li>
+    <li>검수할 노트북: 사전 작업자가 OS를 다시 설치하고, 임시 계정으로 바탕화면까지 들어간 상태. 와이파이 등 네트워크 연결</li>
+    <li>포트 테스트용: USB 메모리 1개, 외부 모니터와 케이블(HDMI 등), SD 카드, 충전기</li>
+    <li>이어폰 (이어폰 단자가 있는 기종)</li>
+  </ul>
+  <div class="banner minus"><b>중요</b>회사 보안 프로그램이 설치된 사내 PC는 USB 쓰기·프로그램 실행이 막혀 결과 저장이 실패함. 알파 테스트는 회수 기기 등 보안 프로그램이 없는 기기로 진행</div>
+
+  <h2 id="usb">검수 USB 만들기</h2>
+  <ol>
+    <li>위 버튼으로 <code>anode-inspect-alpha.zip</code> 내려받기</li>
+    <li>압축 풀기. <code>anode-inspect</code> 폴더 1개가 나옴</li>
+    <li><code>anode-inspect</code> 폴더를 USB 최상위에 그대로 복사 (폴더 이름·안의 구성 변경 금지)</li>
+  </ol>
+  <pre class="tree">USB/
+└── anode-inspect/
+    ├── ANODE-USB.json     검수 USB 표식 (지우면 결과 저장 불가)
+    ├── inspector-mac/     맥 앱
+    ├── inspector-win/     윈도우 앱과 smartctl.exe
+    ├── results/           검수 결과 (기기별로 자동 생성)
+    ├── exports/           엑셀 결과 (첫 저장 때 자동 생성)
+    ├── licenses/          동봉 프로그램 라이선스
+    └── manual.html        이 안내문 사본 (로고 파일 2개 포함)</pre>
+  <div class="banner"><b>참고</b>앱은 실행된 위치에서 <code>ANODE-USB.json</code>을 찾아 그 폴더에 결과를 저장함. 앱만 따로 다른 곳에 복사하면 저장 불가</div>
+
+  <h2 id="mac">맥에서 실행</h2>
+  <h3>처음 한 번: 인터넷에서 받은 파일 표시 해제</h3>
+  <p>인터넷에서 받은 앱은 맥이 임시 위치로 옮겨 실행해서 검수 USB를 찾지 못함. USB를 꽂은 뒤 터미널에서 아래 한 줄 실행</p>
+  <ol>
+    <li>터미널 열기: ⌘+스페이스로 Spotlight를 열고 "터미널" 입력 후 Enter</li>
+    <li>아래 명령에서 <code>USB이름</code>을 Finder에 보이는 USB 이름으로 바꿔 붙여넣고 Enter</li>
+  </ol>
+  <pre class="cmd">xattr -dr com.apple.quarantine "/Volumes/USB이름/anode-inspect"</pre>
+  <h3>실행</h3>
+  <ol>
+    <li>USB의 <code>anode-inspect/inspector-mac/anode-inspector</code> 앱 더블클릭</li>
+    <li>실행이 막히면: 시스템 설정 → 개인정보 보호 및 보안 → 아래쪽 "그래도 열기" → 다시 실행</li>
+    <li>카메라·마이크 접근 요청은 허용 (카메라·마이크 테스트에 필요. 영상·녹음은 저장하지 않음)</li>
+  </ol>
+  <div class="banner warn"><b>주의</b>맥은 활성화 잠금(Apple 계정)이 풀린 초기화 기기만 검수 대상. 자동 수집 결과에 "활성화 잠금 켜짐"이 나오면 매입 중단 사유</div>
+
+  <h2 id="win">윈도우에서 실행</h2>
+  <ol>
+    <li><strong>스마트 앱 컨트롤 끄기</strong> (새로 설치한 윈도우 11은 서명 없는 앱을 막음): 설정 → 개인 정보 및 보안 → Windows 보안 → 앱 및 브라우저 컨트롤 → 스마트 앱 컨트롤 → 끄기. 검수 후 같은 위치에서 다시 켤 수 있음</li>
+    <li>USB의 <code>anode-inspect\inspector-win\anode-inspector.exe</code>를 마우스 오른쪽 버튼 → <strong>관리자 권한으로 실행</strong> (TPM·저장장치 정보에 필요)</li>
+    <li>"Windows의 PC 보호" 파란 창이 뜨면: 추가 정보 → 실행</li>
+  </ol>
+
+  <h2 id="flow">검수 순서</h2>
+  <table>
+    <thead><tr><th scope="col">순서</th><th scope="col">내용</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">1. 기기 확인</th><td>왼쪽 위 "검수 대상"에서 모델명·시리얼 확인. "시리얼 (펌웨어)" 값이 비어 있거나 기기 하단 라벨과 다르면 "라벨 시리얼"에 라벨 값 입력. 상단 "검수자"에 이름 입력</td></tr>
+      <tr><th scope="row">2. 자동 수집</th><td>앱을 켜면 배터리·저장장치·와이파이·블루투스·OS·잠금 상태를 자동으로 읽어 "자동 수집 결과"에 표시 (몇 초). "확인 필요" 항목은 안내대로 조치 후 "다시 수집". 확인이 끝나면 "수동 검수 시작" (다시 보려면 왼쪽 "자동 수집 결과")</td></tr>
+      <tr><th scope="row">3. 반자동</th><td>키보드·지문 인식·포트·마이크·카메라·전원. 각 항목 화면의 테스트 버튼("키 입력 테스트", "포트 테스트" 등)으로 테스트하면 앱이 상태를 제안하고, 검수자가 "적용"을 눌러야 선택됨</td></tr>
+      <tr><th scope="row">4. 수동</th><td>외관·힌지·디스플레이·스피커 등. 항목마다 "확인 방법"을 열어 기준을 보고 상태 선택. 디스플레이는 "단색 화면 테스트", 스피커는 시험 음 사용</td></tr>
+      <tr><th scope="row">5. 결과 저장</th><td>하단 "결과 저장". 확인 안 한 항목이 있어도 저장 가능 (저장 후 안내에 개수 표시)</td></tr>
+    </tbody>
+  </table>
+  <h3>포트 테스트</h3>
+  <ul>
+    <li>애플 실리콘 맥: 기기의 포트 목록이 자동으로 나옴. 포트마다 USB 메모리·모니터·SD 카드를 한 번씩 연결하면 "확인됨". USB-C는 충전기만으로는 확인되지 않음 (데이터 연결 필요)</li>
+    <li>윈도우·인텔 맥: USB 포트 수를 입력하고 포트마다 USB 메모리를 꽂았다 빼기. 검수 USB가 꽂힌 포트는 자동으로 확인됨. 모니터·SD 카드는 연결하면 인식</li>
+  </ul>
+  <h3>키 입력 테스트</h3>
+  <p>화면에 표시된 필수 키를 한 번씩 입력 (점선 테두리의 선택 키는 기종에 따라 없음). 기능열(F1~F12)은 fn을 누른 채 입력. 끝내려면 "테스트 닫기" 또는 Esc를 2초 길게 누름. 인식되지 않는 키가 있으면 화면 아래 "마지막 입력" 줄을 캡처해서 보고</p>
+
+  <h2 id="save">결과 저장과 회수</h2>
+  <ul>
+    <li>결과 파일: <code>anode-inspect/results/시리얼/</code> 아래 JSON 파일. 기기마다 폴더 생성</li>
+    <li>엑셀: 하단 "USB에 엑셀도 저장"이 켜져 있으면 (기본 켜짐) <code>anode-inspect/exports/검수결과_날짜.xlsx</code>에 그날 검수한 기기 전체가 재고관리 양식 열 순서로 저장됨</li>
+    <li>구글 시트: 관리자가 설정한 USB에서만 자동 전송. 하단에 "구글 시트: 전송 완료" 또는 "구글 시트: 대기 N건" 표시. 대기 건은 다음 저장·앱 실행·"다시 보내기" 때 전송. 설정 없는 USB는 "구글 시트: 설정 없음 (USB에만 저장)" 표시 (정상)</li>
+    <li>테스트가 끝나면 USB의 <code>results</code>·<code>exports</code> 폴더를 담당자에게 전달</li>
+  </ul>
+  <div class="banner"><b>참고</b>엑셀의 STATUS는 앱의 제안값이고 등급 칸은 비워 둠. 등급과 STATUS는 담당자가 확정</div>
+
+  <h2 id="check">알파 테스트 확인 목록</h2>
+  <p>기기마다 아래를 확인하고 다른 점을 보고. 비교할 값을 확인하기 어려우면 앱 값만 기록</p>
+  <table>
+    <thead><tr><th scope="col">구분</th><th scope="col">확인할 것</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">기기 정보</th><td>모델명·시리얼이 기기 라벨과 같은지</td></tr>
+      <tr><th scope="row">배터리</th><td>최대 용량·사이클이 실제 값과 같은지. 맥: 시스템 설정 → 일반 → 정보 → 시스템 리포트 → 전원. 윈도우: 명령 프롬프트에서 <code>powercfg /batteryreport</code> 실행 후 안내된 위치의 battery-report.html 열기 (DESIGN·FULL CHARGE CAPACITY, CYCLE COUNT)</td></tr>
+      <tr><th scope="row">저장장치</th><td>"남은 수명"이 표시되는지. CrystalDiskInfo가 있으면 "건강 상태"와 비교</td></tr>
+      <tr><th scope="row">반자동</th><td>포트 테스트에서 포트가 모두 인식되는지, 전원 항목이 충전기 연결을 2초 안에 반영하는지</td></tr>
+      <tr><th scope="row">테스트 화면</th><td>단색 화면·키 입력·스피커·이어폰·마이크·카메라 테스트가 동작하는지</td></tr>
+      <tr><th scope="row">저장</th><td>결과 저장 후 USB에 결과 파일과 엑셀이 생기는지, 엑셀 내용이 맞는지</td></tr>
+      <tr><th scope="row">사용성</th><td>헷갈리는 문구·버튼, 현장에서 불편한 순서</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="report">문제 보고</h2>
+  <ul>
+    <li>기기 모델명과 OS 버전 (앱 왼쪽 위 "검수 대상"에 표시)</li>
+    <li>문제가 생긴 화면 캡처. 안내 문구 아래 "상세"가 있으면 펼쳐서 함께 캡처</li>
+    <li>화면 오류가 나면 앱이 오류 내용을 표시함. 그 화면 그대로 캡처</li>
+    <li>실제 값과 앱 값이 다르면 둘 다 기록 (예: 배터리 리포트 82%, 앱 86%)</li>
+  </ul>
+
+  <h2 id="limits">알려진 제한</h2>
+  <ul>
+    <li>코드 서명 전이라 맥 실행 차단 안내, 윈도우 "Windows의 PC 보호"·스마트 앱 컨트롤 안내가 뜸</li>
+    <li>윈도우 포트 테스트는 포트 수를 직접 입력하는 방식 (윈도우가 물리 포트 목록을 정확히 제공하지 않음)</li>
+    <li>윈도우 기기 정보 수집은 확인한 기종이 적음 (앱 상단 "시험판" 표시)</li>
+    <li>맥은 모니터가 HDMI·USB-C 중 어디로 연결됐는지 구분하지 못함</li>
+    <li>HDD는 저장장치 남은 수명을 표시하지 않음</li>
+  </ul>
+
+  <h2 id="sheets">구글 시트 전송 설정 (관리자)</h2>
+  <p>배포 묶음에는 전송 설정이 없음 (공개 배포 파일에 비밀값을 넣지 않기 위함). 시트 전송까지 시험할 USB는 관리자가 <code>anode-inspect/ANODE-USB.json</code>에 사내로 따로 전달한 <code>sheets</code> 항목을 추가</p>
+  <pre class="cmd">{
+  "kind": "anode-inspect-usb",
+  "sheets": { "url": "관리자 전달 주소", "token": "관리자 전달 값" }
+}</pre>
+
+  <footer>a-node 검수 앱 알파 · 사내 테스트용 · smartctl(smartmontools, GPL-2.0) 동봉, 고지와 소스는 묶음의 licenses 폴더</footer>
+</main>
+</body>
+</html>
