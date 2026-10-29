@@ -81,7 +81,7 @@
   <div class="card download">
     <a class="b-pri" href="https://github.com/ryugoon-ctrl/anode-inspect-release/releases/latest/download/anode-inspect-alpha.zip">검수 USB 묶음 내려받기 (zip)</a>
     <a class="b-sec" href="https://github.com/ryugoon-ctrl/anode-inspect-release/releases">버전별 변경 내용</a>
-    <p class="meta">버전 <code>v0.1.0-alpha.2</code> · 윈도우 10·11, macOS (애플 실리콘·인텔)</p>
+    <p class="meta">버전 <code>v0.1.0-alpha.3</code> · 윈도우 10·11, macOS (애플 실리콘·인텔)</p>
   </div>
 
   <ol class="toc">
@@ -91,6 +91,7 @@
     <li><a href="#win">윈도우에서 실행</a></li>
     <li><a href="#flow">검수 순서</a></li>
     <li><a href="#save">결과 저장과 회수</a></li>
+    <li><a href="#update">새 버전으로 교체</a></li>
     <li><a href="#check">알파 테스트 확인 목록</a></li>
     <li><a href="#report">문제 보고</a></li>
     <li><a href="#limits">알려진 제한</a></li>
@@ -174,6 +175,16 @@
   </ul>
   <div class="banner"><b>참고</b>엑셀의 STATUS는 앱의 제안값이고 등급 칸은 비워 둠. 등급과 STATUS는 담당자가 확정</div>
 
+  <h2 id="update">새 버전으로 교체</h2>
+  <p>앱 이름 옆에 현재 버전 표시. 인터넷에 연결된 상태로 앱을 열면 새 버전이 있을 때 상단에 "새 버전 … 있음" 안내가 뜸. 안내가 뜨면 아래 순서로 교체</p>
+  <ol>
+    <li>앱 종료</li>
+    <li>위 버튼으로 새 <code>anode-inspect-alpha.zip</code> 내려받고 압축 풀기</li>
+    <li>USB의 <code>anode-inspect</code> 폴더에서 <code>inspector-mac</code>·<code>inspector-win</code> 폴더를 지우고, 새로 받은 같은 이름의 폴더 2개를 복사</li>
+    <li>맥: <a href="#mac">맥에서 실행</a>의 "처음 한 번" 명령을 다시 실행. 윈도우: 처음 실행 때와 같은 경고가 다시 뜰 수 있음</li>
+  </ol>
+  <div class="banner minus"><b>중요</b><code>anode-inspect</code> 폴더 전체를 덮어쓰지 않음. <code>ANODE-USB.json</code>을 덮어쓰면 구글 시트 전송 설정이 사라지고, <code>results</code>·<code>exports</code>에는 검수 결과가 있음</div>
+
   <h2 id="check">알파 테스트 확인 목록</h2>
   <p>기기마다 아래를 확인하고 다른 점을 보고. 비교할 값을 확인하기 어려우면 앱 값만 기록</p>
   <table>
@@ -192,6 +203,7 @@
   <h2 id="report">문제 보고</h2>
   <p>앱 오른쪽 위 <strong>피드백</strong> 버튼으로 피드백 시트를 열고 <strong>피드백</strong> 탭에 한 줄씩 작성. 회사 구글 계정 로그인 필요. 다른 탭(재고행·원본)은 수정하지 않음</p>
   <ul>
+    <li>앱 버전 (앱 이름 옆에 표시, 예: v0.1.0-alpha.3)</li>
     <li>기기 모델명과 OS 버전 (앱 왼쪽 위 "검수 대상"에 표시)</li>
     <li>문제가 생긴 화면 캡처. 안내 문구 아래 "상세"가 있으면 펼쳐서 함께 캡처</li>
     <li>화면 오류가 나면 앱이 오류 내용을 표시함. 그 화면 그대로 캡처</li>
